@@ -1,35 +1,149 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useState } from 'react'
+import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0);
+// Sample posts data - replace with your markdown processing later
+const postsData = [
+  {
+    slug: 'welcome',
+    title: 'Welcome to My Digital Space',
+    date: '2025-01-15',
+    excerpt: 'A brief introduction to this new iteration of my personal website.',
+    content: 'This is the inaugural post of my redesigned personal website. After years of complexity, I\'ve decided to embrace simplicity.'
+  },
+  {
+    slug: 'on-simplicity',
+    title: 'On Simplicity in Design',
+    date: '2025-01-20',
+    excerpt: 'Exploring why less is often more in design.',
+    content: 'There\'s something deeply satisfying about stripping away the unnecessary. In our hyperconnected world, simplicity becomes a form of rebellion.'
+  }
+]
 
+function Header({ currentPage, onNavigate }) {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <header className="header">
+      <h1 className="site-title">Benjamin Friedman Wilson</h1>
+      <nav className="nav">
+        <button 
+          onClick={() => onNavigate('home')} 
+          className={currentPage === 'home' ? 'active' : ''}
+        >
+          home
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+        <button 
+          onClick={() => onNavigate('about')} 
+          className={currentPage === 'about' ? 'active' : ''}
+        >
+          about
+        </button>
+      </nav>
+    </header>
+  )
 }
 
-export default App;
+function Footer() {
+  return (
+    <footer className="footer">
+      <p>© 2025 — Benjamin Friedman Wilson</p>
+    </footer>
+  )
+}
+
+function PostCard({ post, onSelectPost }) {
+  return (
+    <article className="post-item">
+      <h2 className="post-title">
+        <button onClick={() => onSelectPost(post)}>{post.title}</button>
+      </h2>
+      <time className="post-date">{post.date}</time>
+      <p className="post-excerpt">{post.excerpt}</p>
+      <button onClick={() => onSelectPost(post)} className="read-more">
+        read more →
+      </button>
+    </article>
+  )
+}
+
+function HomePage({ posts, onSelectPost }) {
+  return (
+    <div className="post-list">
+      {posts.map(post => (
+        <PostCard key={post.slug} post={post} onSelectPost={onSelectPost} />
+      ))}
+    </div>
+  )
+}
+
+function PostPage({ post, onBack }) {
+  return (
+    <>
+      <button onClick={onBack} className="back-link">← back to posts</button>
+      <article>
+        <time className="post-date">{post.date}</time>
+        <div className="post-content">
+          <h1>{post.title}</h1>
+          <p>{post.content}</p>
+        </div>
+      </article>
+    </>
+  )
+}
+
+function AboutPage() {
+  return (
+    <div className="about-content">
+      <h1>About</h1>
+      <p>
+        I'm a designer and developer interested in the intersection of digital and physical spaces. 
+        This website is my attempt to create a calm corner of the internet.
+      </p>
+      <p>
+        This site is built with React and Vite, styled with pure CSS, and designed with 
+        readability and simplicity in mind.
+      </p>
+    </div>
+  )
+}
+
+function App() {
+  const [currentPage, setCurrentPage] = useState('home')
+  const [selectedPost, setSelectedPost] = useState(null)
+
+  const handleNavigate = (page) => {
+    setCurrentPage(page)
+    setSelectedPost(null)
+  }
+
+  const handleSelectPost = (post) => {
+    setSelectedPost(post)
+    setCurrentPage('post')
+  }
+
+  const handleBackToPosts = () => {
+    setSelectedPost(null)
+    setCurrentPage('home')
+  }
+
+  const renderContent = () => {
+    switch (currentPage) {
+      case 'about':
+        return <AboutPage />
+      case 'post':
+        return <PostPage post={selectedPost} onBack={handleBackToPosts} />
+      default:
+        return <HomePage posts={postsData} onSelectPost={handleSelectPost} />
+    }
+  }
+
+  return (
+    <div className="container">
+      <Header currentPage={currentPage} onNavigate={handleNavigate} />
+      <main className="content">
+        {renderContent()}
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+export default App
