@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run build-posts && vite",
+    "build-posts": "node scripts/build-posts.js",
+    "build": "npm run build-posts && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

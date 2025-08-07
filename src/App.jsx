@@ -1,23 +1,6 @@
 import { useState } from 'react'
+import { getAllPosts } from './utils/posts.js'
 import './App.css'
-
-// Sample posts data - replace with your markdown processing later
-const postsData = [
-  {
-    slug: 'welcome',
-    title: 'Welcome to My Digital Space',
-    date: '2025-01-15',
-    excerpt: 'A brief introduction to this new iteration of my personal website.',
-    content: 'This is the inaugural post of my redesigned personal website. After years of complexity, I\'ve decided to embrace simplicity.'
-  },
-  {
-    slug: 'on-simplicity',
-    title: 'On Simplicity in Design',
-    date: '2025-01-20',
-    excerpt: 'Exploring why less is often more in design.',
-    content: 'There\'s something deeply satisfying about stripping away the unnecessary. In our hyperconnected world, simplicity becomes a form of rebellion.'
-  }
-]
 
 function Header({ currentPage, onNavigate }) {
   return (
@@ -44,7 +27,7 @@ function Header({ currentPage, onNavigate }) {
 function Footer() {
   return (
     <footer className="footer">
-      <p>© 2025 — Benjamin Friedman Wilson</p>
+      <p>© Benjamin Friedman Wilson 2025</p>
     </footer>
   )
 }
@@ -75,14 +58,32 @@ function HomePage({ posts, onSelectPost }) {
 }
 
 function PostPage({ post, onBack }) {
+  // Simple markdown-to-HTML conversion for now
+  const renderContent = (content) => {
+    return content
+      .split('\n\n')
+      .map((paragraph, index) => {
+        if (paragraph.startsWith('# ')) {
+          return <h1 key={index}>{paragraph.slice(2)}</h1>
+        }
+        if (paragraph.startsWith('## ')) {
+          return <h2 key={index}>{paragraph.slice(3)}</h2>
+        }
+        if (paragraph.trim() === '') {
+          return null
+        }
+        return <p key={index}>{paragraph}</p>
+      })
+      .filter(Boolean)
+  }
+
   return (
     <>
       <button onClick={onBack} className="back-link">← back to posts</button>
       <article>
         <time className="post-date">{post.date}</time>
         <div className="post-content">
-          <h1>{post.title}</h1>
-          <p>{post.content}</p>
+          {renderContent(post.content)}
         </div>
       </article>
     </>
@@ -108,6 +109,9 @@ function AboutPage() {
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedPost, setSelectedPost] = useState(null)
+  
+  // Load posts from build script
+  const posts = getAllPosts()
 
   const handleNavigate = (page) => {
     setCurrentPage(page)
@@ -131,7 +135,7 @@ function App() {
       case 'post':
         return <PostPage post={selectedPost} onBack={handleBackToPosts} />
       default:
-        return <HomePage posts={postsData} onSelectPost={handleSelectPost} />
+        return <HomePage posts={posts} onSelectPost={handleSelectPost} />
     }
   }
 
