@@ -95,12 +95,21 @@ function AboutPage() {
     <div className="about-content">
       <h1>About</h1>
       <p>
-        I'm a designer and developer interested in the intersection of digital and physical spaces. 
-        This website is my attempt to create a calm corner of the internet.
+        Hey! I'm a software engineer at <a href="https://www.typefox.io/">TypeFox</a> with a specialization in programming language theory.
+        I do a lot of work with Langium to design & develop domain-specific programming languages, and their associated components (parsers, type checkers, transpilers, etc.).
+        I've done work in a variety of domains: from industrial automation, finance, embedded systems, and more.
+        I also lead the development of <a href="https://github.com/eclipse-langium/langium-ai?tab=readme-ov-file#langium-ai">Langium AI</a>, which makes it easier to build capable AI assistants for DSLs.
+        Beyond work I enjoy cooking, designing 3D printable mechanisms, and reparing or recyling old tech into something new.
       </p>
       <p>
-        This site is built with React and Vite, styled with pure CSS, and designed with 
-        readability and simplicity in mind.
+        This site is primarily focused on sharing my experiences building projects or working through tear-downs that I do in my spare time.
+        Most of these projects are personal explorations, as a way to learn new skills, meditate on a task, and find personal joy & inspiration in the work itself.
+        The work I share here reflects my experiences & thoughts as I proceed through these projects.
+        Not all of them go exactly as planned, but quite frankly that's half the fun!
+      </p>
+      <p>
+        It's hard to pin down <span style={{fontStyle: 'italic'}}>what</span> these projects are precisely, as my focus changes over time.
+        As of late I've been focused on creating dioramas with interactive components, as a way to combine design, electronics, and programming into a single context.
       </p>
     </div>
   )
