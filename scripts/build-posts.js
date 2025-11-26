@@ -68,16 +68,19 @@ function buildPosts() {
         content,
         frontmatter
       }
-    })
+    });
+
+    // filter by 'draft' status
+    const publishedPosts = posts.filter(post => post.frontmatter.draft !== 'true' && post.frontmatter.draft !== true);
 
     // Sort by date (newest first)
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date))
+    publishedPosts.sort((a, b) => new Date(b.date) - new Date(a.date))
 
     // Generate the posts.js file
     const output = `// Auto-generated file - do not edit manually
 // Run 'npm run build-posts' to regenerate
 
-export const posts = ${JSON.stringify(posts, null, 2)}
+export const posts = ${JSON.stringify(publishedPosts, null, 2)}
 
 export function getPost(slug) {
   return posts.find(post => post.slug === slug)
@@ -95,8 +98,8 @@ export function getAllPosts() {
     }
 
     fs.writeFileSync(OUTPUT_FILE, output)
-    console.log(`✅ Built ${posts.length} posts`)
-    posts.forEach(post => {
+    console.log(`✅ Built ${publishedPosts.length} posts`)
+    publishedPosts.forEach(post => {
       console.log(`   - ${post.title} (${post.date})`)
     })
   } catch (error) {
