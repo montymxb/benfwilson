@@ -2,7 +2,7 @@
 title: New Site Setup
 date: 2025-11-26
 excerpt: New site setup.
-
+draft: true
 ---
 
 # New Site

@@ -43,7 +43,7 @@ body {
   font-size: 0.9rem;
 }
 
-.nav button {
+.nav a {
   background: none;
   border: none;
   color: #000;
@@ -53,10 +53,11 @@ body {
   border-bottom: 1px solid transparent;
   transition: border-color 0.2s ease;
   padding: 0;
+  text-decoration: none;
 }
 
-.nav button:hover,
-.nav button.active {
+.nav a:hover,
+.nav a.active {
   border-bottom-color: #000;
 }
 
@@ -86,7 +87,7 @@ body {
   letter-spacing: -0.02em;
 }
 
-.post-title button {
+.post-title a {
   background: none;
   border: none;
   color: #000;
@@ -99,7 +100,7 @@ body {
   text-decoration: none;
 }
 
-.post-title button:hover {
+.post-title a:hover {
   text-decoration: underline;
 }
 
@@ -123,6 +124,7 @@ body {
   font-size: 0.9rem;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   padding: 0;
+  text-decoration: none;
 }
 
 .read-more:hover {
@@ -158,6 +160,16 @@ body {
 
 .post-content p {
   margin-bottom: 1.5rem;
+}
+
+.post-content ul,
+.post-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+}
+
+.post-content li {
+  margin-bottom: 0.5rem;
 }
 
 .post-content code {

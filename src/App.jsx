@@ -1,27 +1,37 @@
-import { useState, useEffect } from 'react'
-import { getAllPosts } from './utils/posts.js'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router'
+import { getAllPosts, getPost } from './utils/posts.js'
 import Markdown from 'marked-react'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import './App.css'
 
-function Header({ currentPage, onNavigate }) {
+function Header() {
+  const location = useLocation()
+
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname.startsWith(path)
+  }
+
   return (
     <header className="header">
       <h1 className="site-title">Benjamin Friedman Wilson</h1>
       <nav className="nav">
-        <button 
-          onClick={() => onNavigate('home')} 
-          className={currentPage === 'home' ? 'active' : ''}
+        <Link
+          to="/"
+          className={isActive('/') ? 'active' : ''}
         >
           home
-        </button>
-        <button 
-          onClick={() => onNavigate('about')} 
-          className={currentPage === 'about' ? 'active' : ''}
+        </Link>
+        <Link
+          to="/about"
+          className={isActive('/about') ? 'active' : ''}
         >
           about
-        </button>
+        </Link>
       </nav>
     </header>
   )
@@ -35,32 +45,38 @@ function Footer() {
   )
 }
 
-function PostCard({ post, onSelectPost }) {
+function PostCard({ post }) {
   return (
     <article className="post-item">
       <h2 className="post-title">
-        <button onClick={() => onSelectPost(post)}>{post.title}</button>
+        <Link to={`/post/${post.slug}`}>{post.title}</Link>
       </h2>
       <time className="post-date">{post.date}</time>
       <p className="post-excerpt">{post.excerpt}</p>
-      <button onClick={() => onSelectPost(post)} className="read-more">
+      <Link to={`/post/${post.slug}`} className="read-more">
         read more →
-      </button>
+      </Link>
     </article>
   )
 }
 
-function HomePage({ posts, onSelectPost }) {
+function HomePage() {
+  const posts = getAllPosts()
+
   return (
     <div className="post-list">
       {posts.map(post => (
-        <PostCard key={post.slug} post={post} onSelectPost={onSelectPost} />
+        <PostCard key={post.slug} post={post} />
       ))}
     </div>
   )
 }
 
-function PostPage({ post, onBack }) {
+function PostPage() {
+  const { slug } = useParams()
+  const navigate = useNavigate()
+  const post = getPost(slug)
+
   useEffect(() => {
     // apply syntax highlighting to all code blocks
     document.querySelectorAll('pre code').forEach((block) => {
@@ -68,9 +84,18 @@ function PostPage({ post, onBack }) {
     })
   }, [post])
 
+  if (!post) {
+    return (
+      <div>
+        <p>Post not found</p>
+        <Link to="/" className="back-link">← back to posts</Link>
+      </div>
+    )
+  }
+
   return (
     <>
-      <button onClick={onBack} className="back-link">← back to posts</button>
+      <button onClick={() => navigate('/')} className="back-link">← back to posts</button>
       <article>
         <h1 className="post-title">{post.title}</h1>
         <time className="post-date">{post.date}</time>
@@ -108,46 +133,20 @@ function AboutPage() {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home')
-  const [selectedPost, setSelectedPost] = useState(null)
-  
-  // Load posts from build script
-  const posts = getAllPosts()
-
-  const handleNavigate = (page) => {
-    setCurrentPage(page)
-    setSelectedPost(null)
-  }
-
-  const handleSelectPost = (post) => {
-    setSelectedPost(post)
-    setCurrentPage('post')
-  }
-
-  const handleBackToPosts = () => {
-    setSelectedPost(null)
-    setCurrentPage('home')
-  }
-
-  const renderContent = () => {
-    switch (currentPage) {
-      case 'about':
-        return <AboutPage />
-      case 'post':
-        return <PostPage post={selectedPost} onBack={handleBackToPosts} />
-      default:
-        return <HomePage posts={posts} onSelectPost={handleSelectPost} />
-    }
-  }
-
   return (
-    <div className="container">
-      <Header currentPage={currentPage} onNavigate={handleNavigate} />
-      <main className="content">
-        {renderContent()}
-      </main>
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <div className="container">
+        <Header />
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/post/:slug" element={<PostPage />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </BrowserRouter>
   )
 }
 
