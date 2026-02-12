@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getAllPosts } from './utils/posts.js'
 import Markdown from 'marked-react'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 import './App.css'
 
 function Header({ currentPage, onNavigate }) {
@@ -59,6 +61,13 @@ function HomePage({ posts, onSelectPost }) {
 }
 
 function PostPage({ post, onBack }) {
+  useEffect(() => {
+    // apply syntax highlighting to all code blocks
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightElement(block)
+    })
+  }, [post])
+
   return (
     <>
       <button onClick={onBack} className="back-link">← back to posts</button>

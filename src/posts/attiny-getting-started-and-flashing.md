@@ -162,8 +162,6 @@ SCK  |• •| MOSI
 RST  |• •| GND
 ```
 
-_PERSONAL NOTE: Purple (+) and Red (-), counter intuitive but that's how I've got it wired up_.
-
 So the first thing was verifying the orientation of VCC and GND with a multimeter, and once I had that the rest of the pins fall into place pretty nicely per the pin layout above. It always helps to double check (or even triple check) your pins, as I often and _frequently_ end up with an off-by-one error with my wiring. Depending on how you make that mistake, it can be a simpler change or a whole new chip that you need to grab.
 
 Assuming that's all wired up and your programmer of choice is plugged in, you can hook everything up. One particular note about my programmer was about the board power capability. I wanted this off at first, but later on it could be particularly problematic given it's fixed at 5v power. If there's any 3.3v logic on board, that could cause some problems, assuming that's not handled correctly with a logic-level converter (which I do have around just in case).
@@ -195,14 +193,16 @@ At this point, I decided to try out the other programmers I had, without connect
 Based on what I came across, not seeing a USBTiny device in `/dev` appears to be expected, as it doesn't populate a new device entry. I'm not familiar enough to do more than speculate, but it appears to be related to how it communicates via `libusb`, but I could be wrong here. Establishing this at least alleviated my concern that the problem was from the missing device, and helped me to get a sense of why `avrdude` was indicating a device was found still, but it did not resolve the programmer flashing issue.
 
 At this point I got super stuck, and it was late, so I read up on things & tinkered for a bit.
+
 - FT232R is not the right choice (that's UART, not SPI, which is COPI/CIPO)
 - Arduino nano as programmer seems viable as well...
+
 
 So after much digging & such, I decided to shift to using an Arduino as ISP, with a pair of Nanos I had lying around. One was viable, but the other was locked up due to something I had loaded on it years ago. I figured a good way to test ISP capability was to try and reset that other board (if it could be done). So I wired them up and gave it a shot after loading the first board w/ the ArduinoISP sketch.
 
 However, after much testing, I was still nowhere closer to a solution. So I took a break and stepped away for a day or so.
 
-### Feb. 2nd, 2026
+### Coming back to Flashing
 
 The following day I read up quite a bit more about programming ATTiny's in general, and especially about some of the 'gotchas' that tend to come up. For the most part, it seems like it shouldn't be a driver issue (but that can be investigated on another machine), and I don't believe I've messed up the pin connections. But I do have a hunch that my wires (via dupont connectors) aren't as good as I would expect them to be. That, or the chip itself is not good.
 
@@ -218,8 +218,6 @@ Error: expected signature for ATtiny45 is 1E 92 06
 ```
 
 This is better than before at least, but it's still not what I want. The other thing is I probably need to 'power' the board for programming, which I did not do properly, and I wanted to investigate setting up an additional cap between power & ground to stabilize things further.
-
-_Later that night_
 
 Well after rewiring back to the AVR Pocker Programmer a second time around, I was able to get the device to connect correctly, and program with a flashing light! Finally. After double checking a few things, I was able to isolate it down to the power feature being set to 'off'. I was under the impression that, since I was reading voltage around ~4.7 volts on VCC, it was sufficient to allow programming to happen. _But_, it seems that I although I was reading this voltage, I may have not been getting sufficient power to flash the chip. Honestly, I'm not sure yet, but I'm keeping it as an open point to investigate in more detail later on. For now having the chip flashed is a good enough spot to stop on.
 
