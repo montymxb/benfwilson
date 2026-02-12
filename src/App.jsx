@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getAllPosts } from './utils/posts.js'
+import Markdown from 'marked-react'
 import './App.css'
 
 function Header({ currentPage, onNavigate }) {
@@ -58,32 +59,14 @@ function HomePage({ posts, onSelectPost }) {
 }
 
 function PostPage({ post, onBack }) {
-  // Simple markdown-to-HTML conversion for now
-  const renderContent = (content) => {
-    return content
-      .split('\n\n')
-      .map((paragraph, index) => {
-        if (paragraph.startsWith('# ')) {
-          return <h1 key={index}>{paragraph.slice(2)}</h1>
-        }
-        if (paragraph.startsWith('## ')) {
-          return <h2 key={index}>{paragraph.slice(3)}</h2>
-        }
-        if (paragraph.trim() === '') {
-          return null
-        }
-        return <p key={index}>{paragraph}</p>
-      })
-      .filter(Boolean)
-  }
-
   return (
     <>
       <button onClick={onBack} className="back-link">← back to posts</button>
       <article>
+        <h1 className="post-title">{post.title}</h1>
         <time className="post-date">{post.date}</time>
         <div className="post-content">
-          {renderContent(post.content)}
+          <Markdown>{post.content}</Markdown>
         </div>
       </article>
     </>
