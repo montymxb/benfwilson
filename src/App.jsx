@@ -40,7 +40,7 @@ function Header() {
 function Footer() {
   return (
     <footer className="footer">
-      <p>© Benjamin Friedman Wilson 2025</p>
+      <p>© Benjamin Friedman Wilson 2026</p>
     </footer>
   )
 }
