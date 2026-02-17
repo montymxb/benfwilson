@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "npm run build-posts && vite",
     "build-posts": "node scripts/build-posts.js",
-    "build": "npm run build-posts && vite build",
+    "generate-pages": "node scripts/generate-pages.js",
+    "build": "npm run build-posts && vite build && npm run generate-pages",
     "lint": "eslint .",
     "preview": "vite preview"
   },
