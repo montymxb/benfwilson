@@ -93,6 +93,17 @@ function PostPage() {
     )
   }
 
+  // custom renderer for code blocks to add language classes
+  const renderer = {
+    code(code, lang) {
+      return (
+        <pre>
+          <code className={lang ? `language-${lang}` : ''}>{code}</code>
+        </pre>
+      )
+    }
+  }
+
   return (
     <>
       <button onClick={() => navigate('/')} className="back-link">← back to posts</button>
@@ -100,7 +111,7 @@ function PostPage() {
         <h1 className="post-title">{post.title}</h1>
         <time className="post-date">{post.date}</time>
         <div className="post-content">
-          <Markdown>{post.content}</Markdown>
+          <Markdown renderer={renderer}>{post.content}</Markdown>
         </div>
       </article>
     </>
