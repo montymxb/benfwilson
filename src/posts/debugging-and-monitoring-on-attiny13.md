@@ -1,7 +1,7 @@
 ---
 title: Debugging & Monitoring on an ATTiny13
 date: 2026-03-07
-tags: [attiny, post, project, avr]
+tags: [attiny, post, project, avr, debugging]
 excerpt: Getting debugging & monitoring setup with bit-banged UART on the ATTiny13
 draft: false
 ---

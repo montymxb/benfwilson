@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router'
 import { getAllPosts, getPost } from './utils/posts.js'
+import { preprocessMarkdown } from './utils/markdown.js'
 import Markdown from 'marked-react'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
@@ -93,7 +94,7 @@ function PostPage() {
     )
   }
 
-  // custom renderer for code blocks to add language classes
+  // custom renderer for code blocks, images, and admonitions
   const renderer = {
     code(code, lang) {
       return (
@@ -101,8 +102,47 @@ function PostPage() {
           <code className={lang ? `language-${lang}` : ''}>{code}</code>
         </pre>
       )
+    },
+    image(src, alt) {
+      return (
+        <figure className="post-figure">
+          <img src={src} alt={alt || ''} />
+          {alt && <figcaption>{alt}</figcaption>}
+        </figure>
+      )
+    },
+    blockquote(children) {
+      // detect admonition sentinel comment in children
+      const flat = Array.isArray(children) ? children.flat(Infinity) : [children]
+      let admonitionType = null
+
+      for (const child of flat) {
+        if (typeof child === 'string') {
+          const match = child.match(/<!--admonition:(\w+)-->/)
+          if (match) {
+            admonitionType = match[1]
+            break
+          }
+        }
+      }
+
+      if (admonitionType) {
+        // filter out the sentinel comment from rendered children
+        const filtered = flat.filter(
+          child => !(typeof child === 'string' && child.includes('<!--admonition:'))
+        )
+        return (
+          <aside className={`admonition admonition-${admonitionType}`}>
+            {filtered}
+          </aside>
+        )
+      }
+
+      return <blockquote>{children}</blockquote>
     }
   }
+
+  const processedContent = preprocessMarkdown(post.content)
 
   return (
     <>
@@ -111,7 +151,7 @@ function PostPage() {
         <h1 className="post-title">{post.title}</h1>
         <time className="post-date">{post.date}</time>
         <div className="post-content">
-          <Markdown renderer={renderer}>{post.content}</Markdown>
+          <Markdown renderer={renderer}>{processedContent}</Markdown>
         </div>
       </article>
     </>
