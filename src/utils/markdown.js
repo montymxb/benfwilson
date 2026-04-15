@@ -37,7 +37,9 @@ export function processAdmonitions(markdown) {
  * Definitions:  [^1]: Footnote text here
  *               Can span multiple lines if indented.
  *
- * Converts refs to superscript links and appends a footnotes section.
+ * Returns { content, footnotes } where footnotes is an array of
+ * { index, text } objects for rendering separately in React.
+ * Inline refs become markdown links: [¹](#footnote-1)
  */
 export function processFootnotes(markdown) {
   const lines = markdown.split('\n')
@@ -69,11 +71,16 @@ export function processFootnotes(markdown) {
   }
 
   if (definitions.size === 0) {
-    return markdown
+    return { content: markdown, footnotes: [] }
   }
 
-  // second pass: replace inline references with superscript links
+  // second pass: replace inline references with markdown links
   // track which footnotes are actually referenced and assign numbers
+  const superscriptDigits = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+  const toSuperscript = (n) => {
+    return String(n).split('').map(d => superscriptDigits[Number(d)]).join('')
+  }
+
   const referencedOrder = []
   let content = nonDefLines.join('\n')
 
@@ -85,29 +92,47 @@ export function processFootnotes(markdown) {
       referencedOrder.push(label)
     }
     const index = referencedOrder.indexOf(label) + 1
-    return `<sup>[${index}](#footnote-${index})</sup>`
+    return `[${toSuperscript(index)}](#footnote-${index})`
   })
 
-  // build footnotes section from referenced definitions (in order)
-  if (referencedOrder.length > 0) {
-    const footnotesSection = ['\n---\n']
-    for (let i = 0; i < referencedOrder.length; i++) {
-      const label = referencedOrder[i]
-      const text = definitions.get(label)
-      footnotesSection.push(`${i + 1}. <span id="footnote-${i + 1}"></span> ${text}`)
-    }
-    content += '\n' + footnotesSection.join('\n')
-  }
+  // build footnotes array for React rendering
+  const footnotes = referencedOrder.map((label, i) => ({
+    index: i + 1,
+    text: definitions.get(label)
+  }))
 
-  return content
+  return { content, footnotes }
+}
+
+/**
+ * Splits content on a <!-- draft-below --> marker.
+ * Everything above renders normally; everything below is
+ * returned separately so it can be styled as draft/unreviewed.
+ */
+export function splitDraftMarker(markdown) {
+  const marker = /^<!--\s*draft-below\s*-->$/im
+  const match = markdown.match(marker)
+  if (!match) {
+    return { above: markdown, below: null }
+  }
+  const idx = match.index
+  return {
+    above: markdown.slice(0, idx).trimEnd(),
+    below: markdown.slice(idx + match[0].length).trimStart()
+  }
 }
 
 /**
  * Runs all custom markdown preprocessors on the input.
+ * Returns { content, draftContent, footnotes } where:
+ *  - content is the reviewed portion of the post
+ *  - draftContent (if any) is the unreviewed portion after <!-- draft-below -->
+ *  - footnotes is an array of { index, text } for rendering a footnotes section
  */
 export function preprocessMarkdown(markdown) {
   let result = markdown
   result = processAdmonitions(result)
-  result = processFootnotes(result)
-  return result
+  const { content, footnotes } = processFootnotes(result)
+  const { above, below } = splitDraftMarker(content)
+  return { content: above, draftContent: below, footnotes }
 }

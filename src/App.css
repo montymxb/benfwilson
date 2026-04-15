@@ -257,12 +257,43 @@ body {
   background: #fff0f0;
 }
 
-/* footnotes */
-.post-content sup a {
+/* draft-below marker */
+.post-content .draft-below {
+  opacity: 0.4;
+}
+
+.post-content .draft-below-marker {
+  border-top: 2px dashed #ccc;
+  text-align: center;
+  font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+  font-size: 0.75rem;
+  color: #999;
+  padding: 0.5rem 0 1rem;
+  margin-top: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* footnote references (superscript links) */
+.post-content a[href^="#footnote-"] {
   text-decoration: none;
   color: #4a8af4;
   font-weight: 600;
-  font-size: 0.8em;
+}
+
+/* footnotes section */
+.post-content .footnotes {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.post-content .footnotes ol {
+  padding-left: 1.5rem;
+}
+
+.post-content .footnotes li {
+  margin-bottom: 0.4rem;
 }
 
 .about-content {

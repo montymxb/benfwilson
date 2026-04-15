@@ -94,8 +94,28 @@ function PostPage() {
     )
   }
 
-  // custom renderer for code blocks, images, and admonitions
+  // custom renderer for comments, code blocks, images, admonitions, and links
   const renderer = {
+    html(html) {
+      // keep admonition sentinels so the blockquote renderer can detect them
+      if (/<!--admonition:\w+-->/.test(html)) {
+        return html
+      }
+      // suppress all other HTML comments so they don't render as visible text
+      if (/^<!--[\s\S]*?-->$/.test(html.trim())) {
+        return null
+      }
+      return html
+    },
+    link(href, text) {
+      // hash links (footnotes) and relative links stay in the same tab
+      const isExternal = href && !href.startsWith('#') && !href.startsWith('/')
+      return (
+        <a href={href} {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+          {text}
+        </a>
+      )
+    },
     code(code, lang) {
       return (
         <pre>
@@ -142,7 +162,7 @@ function PostPage() {
     }
   }
 
-  const processedContent = preprocessMarkdown(post.content)
+  const { content: processedContent, draftContent, footnotes } = preprocessMarkdown(post.content)
 
   return (
     <>
@@ -152,6 +172,24 @@ function PostPage() {
         <time className="post-date">{post.date}</time>
         <div className="post-content">
           <Markdown renderer={renderer}>{processedContent}</Markdown>
+          {draftContent && (
+            <div className="draft-below">
+              <div className="draft-below-marker">draft below</div>
+              <Markdown renderer={renderer}>{draftContent}</Markdown>
+            </div>
+          )}
+          {footnotes.length > 0 && (
+            <section className="footnotes">
+              <hr />
+              <ol>
+                {footnotes.map(fn => (
+                  <li key={fn.index} id={`footnote-${fn.index}`}>
+                    {fn.text}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
         </div>
       </article>
     </>
