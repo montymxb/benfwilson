@@ -12,7 +12,7 @@ I'll be writing this up as I work through things so I can capture as much of the
 Personally I have an _excessive_ amount of these kinds of notes & dev logs locally, but they're in absolutely no shape to be shared.
 This is a shame really, so I figured I would take the extra effort to just write my notes in a form that _is_ suitable for sharing in the first place.
 Beyond that I have further goals here, but for this post we're going to start small with getting setup to development.
-I just want to get to a point where I can reliably program the micrcontroller, so let's start with that.
+I just want to get to a point where I can reliably program the microcontroller, so let's start with that.
 
 For some background as to why I'm doing this, I've been pretty interested in building up dioramas over the past few years, with a bit of increasing complexity on each following year. Most of it is a creative outlet, an enjoyable form of self-expression, but another part is also technical. In particular, I'm quite interested in experimenting with little technical touches: lights, servos, buttons, and connectivity (where it makes sense) to bring a diorama into a slightly more interactive space. There do already exist solutions for this exact kind of thing, but the last point is that I'm using this as a personal learning experience. By starting with a couple standalone microcontroller chips  (ATTiny13 & 45 for now), I can experience the joy & excitement of watching the whole system come together piece by piece.
 
@@ -29,7 +29,7 @@ So, I needed to familiarize myself with the board, sure I bought it and already 
 
 Again the flashing LED is very much a "hello world" example, but also a simple way to ensure that at least the chip is good to go, and isn't toast. It also gives me a way to verify that I've got a working setup to program AVR microcontrollers. So let's get into that part.
 
-Beyond knowing what kind of chip you're building for, you'll also need the avr toolkit -- specifically `avrdude` and `avr-gcc`. You can flash these chips using an Arduino as an ISP (assuming it's got an AVR chip in it), or also with a regular AVR programmer. For this case I'll just be working with a dedicated AVR programmer, assuming that works out as expected.
+Beyond knowing what kind of chip you're building for, you'll also need the AVR toolkit -- specifically `avrdude` and `avr-gcc`. You can flash these chips using an Arduino as an ISP (assuming it's got an AVR chip in it), or also with a regular AVR programmer. For this case I'll just be working with a dedicated AVR programmer, assuming that works out as expected.
 
 I _have_ thought about exploring programming these boards in [Zig](https://ziglang.org/) rather than C, as I've been picking that up in my spare time. I've always had a soft spot for C (and a bit of C++, but less so), but I don't miss the footguns. I was more interested in the direction of Rust, which is an _excellent_ language in terms of safety (especially with the borrow checker), but I'm finding I naturally gravitate towards a lower level of abstraction. In that sense, the way Zig exposes lower level constructs -- such as making safety checks a present but optional aspect of the language design -- fits what I'm looking for. This isn't to suggest that it's inherently better or worse, it's just a subjective & stylistic preference on my end.
 
@@ -79,7 +79,7 @@ PB4       -|3   6|- PB1
 GND       -|4   5|- PB0
 ```
 
-We'll want to keep an eye on that reset pin. It's technically a 'weak' GPIO (not entirely sure what that means, but it's stated in the datasheet & I'm assuming we just can't drive much with it), but we'll want to retain a way to reset the board. That need may change, but for now that brings us to _5_ GPIOs we can work with.
+We'll want to keep that reset pin in mind. It's technically a 'weak' GPIO (not entirely sure what that means, but it's stated in the datasheet & I'm assuming we just can't drive much with it), but we'll want to retain a way to reset the board. That need may change, but for now that brings us to _5_ GPIOs we can work with.
 
 If you're curious, you can also peek at the rest of the labels assigned to these pins, which I'll unroll here.
 ```
@@ -99,7 +99,7 @@ Again if this is for the ATiny13 or another ATTiny 8-pin variant, the pinout is 
 
 ### avr-gcc
 
-Using the program we wrote up above, we'll can compile that using `avr-gcc` (again, assuming you're installed the related avr tools). If you haven't already, and you're on mac, you use homebrew with [homebrew-avr](https://github.com/osx-cross/homebrew-avr). If you're on Ubuntu or another Debian-like system, you can use:
+Using the program we wrote up above, we'll can compile that using `avr-gcc` (again, assuming you're installed the related AVR tools). If you haven't already, and you're on mac, you use homebrew with [homebrew-avr](https://github.com/osx-cross/homebrew-avr). If you're on Ubuntu or another Debian-like system, you can use:
 ```bash
 # get avr-gcc compiler setup
 sudo apt-get install gcc build-essential
@@ -110,7 +110,7 @@ sudo apt-get install libusb-dev
 sudo apt-get install avrdude
 ```
 
-For Windows it looks like you can pull the compiler from [microship's website](https://www.microchip.com/en-us/tools-resources/develop/microchip-studio/gcc-compilers) directly, and a pre-built release can be retrieved for [avrdude](https://github.com/avrdudes/avrdude).
+For Windows it looks like you can pull the compiler from [microchip's website](https://www.microchip.com/en-us/tools-resources/develop/microchip-studio/gcc-compilers) directly, and a pre-built release can be retrieved for [avrdude](https://github.com/avrdudes/avrdude).
 
 Alright, assuming we have the compiler in place, we can compile it like so:
 ```bash
@@ -128,7 +128,7 @@ After poking around a bit I recalled needing the `-mmcu=attiny13` flag before to
 avr-gcc -mmcu=attiny45 main.c
 ```
 
-There may be a better option from the available values for the mcu, but for now this should suffice (we can always go back & check later). I do have a couple warnings still, but I'll come back to them later.
+There may be a better option from the available values for the MCU, but for now this should suffice (we can always go back & check later). I do have a couple warnings still, but I'll come back to them later.
 
 At this point we should have an `a.out` present as our compiled artifact. If so, we can proceed to getting ready to flash this thing.
 
@@ -142,7 +142,7 @@ It's full of question marks, because, well, I'm genuinely _not_ certain what we 
 
 The `-p` flag is used to specify the part number, which we need to lookup. We can do this quickly via `avrdude -p ?` to list all available parts (literal `?` here, not a placeholder). Note that on my setup working in zsh, I had to escape the `?` to avoid it being literally interpreted, just a small thing to keep in mind.
 
-Greping through with `attiny45` gave the following line:
+Grepping through with `attiny45` gave the following line:
 ```
 t45        = ATtiny45, ATtiny45V (SPM, ISP, HVSP, debugWIRE)
 ```
@@ -223,7 +223,7 @@ However, after much testing, I was still nowhere closer to a solution. So I took
 
 ### Coming back to it
 
-The following day I read up quite a bit more about programming ATTiny's in general, and especially about some of the 'gotchas' that tend to come up. For the most part, it seems like it shouldn't have been a driver issue (but that can be investigated with another machine), and I didn't believe I messed up the pin connections (hopefully). I did have a hunch that my wires (via dupont connectors) maybe weren't as good as thought they were. That, or the micrcontroller itself was possibly damaged.
+The following day I read up quite a bit more about programming ATTiny's in general, and especially about some of the 'gotchas' that tend to come up. For the most part, it seems like it shouldn't have been a driver issue (but that can be investigated with another machine), and I didn't believe I messed up the pin connections (hopefully). I did have a hunch that my wires (via dupont connectors) maybe weren't as good as thought they were. That, or the microcontroller itself was possibly damaged.
 
 I was able to test with another microcontroller to see if that was a factor, and I got a similar response at first, but later made a bit of progress:
 ```
@@ -238,7 +238,7 @@ Error: expected signature for ATtiny45 is 1E 92 06
 
 This was better than before at least, but still not a success (not yet).
 
-Well after rewiring back to the AVR Pocker Programmer a second time around, I was able to get the device to connect correctly, and program with a flashing light! Finally.
+Well after rewiring back to the AVR Pocket Programmer a second time around, I was able to get the device to connect correctly, and program with a flashing light! Finally.
 
 After double checking a few things, I was able to isolate it down to the power feature being set to 'off'. I was under the impression that, since I was reading voltage around ~4.7 volts on VCC, it was sufficient to allow programming to happen. _But_, it seems that although I was reading this voltage via a multimeter, I wasn't actually sending sufficient power to flash the chip. Honestly, I'm not sure yet, but I'm keeping it as an open point to investigate in more detail later on. For now having the chip flashed was a good enough spot to stop on.
 

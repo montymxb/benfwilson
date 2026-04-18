@@ -304,7 +304,7 @@ if (uart_rx_available()) {
 }
 ```
 
-The buffer looked pretty tight, but I still wanted to give this a shot and at least see whether it could work in a pinch. Flashing the program showed I was using 512 bytes (up from 260 with just the TX code). So already that nearly doubled my program size just to get RX logic via interrupts.
+The buffer looked pretty tight, but I still wanted to give this a shot and at least see whether it could. Flashing the program showed I was using 512 bytes (up from 260 with just the TX code). So already that nearly doubled my program size just to get RX logic via interrupts.
 
 Almost *immediately* I realized I didn't wire anything up to allow this to work. So I plugged in PB1 to the RX pin on my serial converter, and then went back to minicom to check the output. I was surprised to not only not be able to send anything, but also now I wasn't getting any output either. My first guess was an extra `DDRB` line that I had forgotten to remove.
 ```c

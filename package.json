@@ -11,7 +11,8 @@
     "watch": "nodemon --watch src/posts/ --ext md --exec 'npm run build'",
     "lint": "eslint .",
     "preview": "vite preview",
-    "optimize:images": "bash scripts/optimize-images.sh"
+    "optimize:images": "bash scripts/optimize-images.sh",
+    "lint:prose": "vale src/posts/"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

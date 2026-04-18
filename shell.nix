@@ -5,5 +5,6 @@ pkgs.mkShell {
     pkgs.exiftool
     pkgs.jpegoptim
     pkgs.optipng
+    pkgs.vale
   ];
 }
