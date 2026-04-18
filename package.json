@@ -10,7 +10,8 @@
     "build": "npm run build-posts && vite build && npm run generate-pages",
     "watch": "nodemon --watch src/posts/ --ext md --exec 'npm run build'",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize:images": "bash scripts/optimize-images.sh"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
