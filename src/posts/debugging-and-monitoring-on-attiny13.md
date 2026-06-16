@@ -6,7 +6,7 @@ excerpt: Getting debugging & monitoring setup with bit-banged UART on the ATTiny
 draft: false
 ---
 
----
+*Updated on June 16th with a few minicom images.*
 
 _This post is a continuation from [getting started developing for the ATTiny13 & 45](/post/attiny-getting-started-and-flashing)._
 
@@ -351,6 +351,12 @@ Data:         50 bytes (78.1% Full)
 
 Fantastic! This was exactly what I was missing, and armed with this new information I was able to see that with the ring buffer I was topping out at 66 bytes for SRAM (103.1% full), definitely not viable. Just to further validate this was the case I trimmed down the buffer by 2 to fit into 64 bytes. That re-flashed with no problems and I was getting the correct serial output again.
 
+![Minicom output showing the string "Hello World" being received from the UART](/assets/images/comms-hw.png)
+
+![Similar output with some different character ranges for testing.](/assets/images/comms-testing123.png)
+
 After re-enabling the RX logic and slimming down that longer test string I was writing out, I had a program which weighed in around 472 bytes flash and 38 bytes data. Not too bad, plus the receive logic was working finally too for just a single byte at a time. Not the most efficient, but that's still a functional half duplex UART along with some other logic for around 472 bytes.
+
+![Minicom output showing that writing along with reading for a single byte, as a PoC.](/assets/images/comms-read-write-2.png)
 
 That'll cap this one off, as it was getting quite long. But I already I was having quite a lot of fun working through this & seeing what I can get setup on this little microcontroller. I think I'll probably conditionally compile out the RX handling going forward, unless I really need it, especially since I'm just getting 1 byte at a time, and the program space could definitely be used for something else.
