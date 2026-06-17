@@ -184,7 +184,7 @@ function PostPage() {
               <ol>
                 {footnotes.map(fn => (
                   <li key={fn.index} id={`footnote-${fn.index}`}>
-                    {fn.text}
+                    <Markdown renderer={renderer}>{fn.text}</Markdown>
                   </li>
                 ))}
               </ol>

@@ -1,13 +1,13 @@
 ---
 title: Adding a CI Runner to Forgejo
-date: 2026-04-18
-tags: [attiny, post, project, avr, oled]
-excerpt: Setting up a tiny OLED driver to work within 1kb of flash & 64 bytes of SRAM on an ATTiny13
+date: 2026-06-17
+tags: [post, homelab, Forgejo, runner, ci, arch, linux]
+excerpt: Setting up a CI Runner for Forgejo on an old 2011 MacBook Pro running Arch Linux.
 draft: false
 ---
 
 I found myself needing to set up a Gitforge locally some months ago to serve as a pre-staging area for development (and local hosting for private projects as well).
-There were a a few good choices to start with, being [Gitlab](https://about.gitlab.com/), [Forgejo](https://forgejo.org/) & [Gitea](https://about.gitea.com/).
+There were a few good choices to start with, being [Gitlab](https://about.gitlab.com/), [Forgejo](https://forgejo.org/) & [Gitea](https://about.gitea.com/).
 Of these I've already set up a Gitea & Gitlab instance in the past, so I was really keen on trying out Forgejo this time around.
 Forgejo itself is based on Gitea as well, and having had a good experience with that, I was interested to see how that would pan out.
 
@@ -19,7 +19,7 @@ Anything to reduce onboarding time & learning friction is always a plus.
 
 [^wiki]:https://en.wikipedia.org/wiki/Forge_(software)
 
-After one thing or another, I eventually came to where I needed a CI runer. So, naturally, I looked into setting up a CI runner in Forgejo.
+After one thing or another, I eventually came to where I needed a CI runner. So, naturally, I looked into setting up a CI runner in Forgejo.
 I ran into a number of hiccups along the way (mostly due to my own setup).
 During the process of tracing my steps, I figured I would write it up in a post later; especially so I could refer to it later on.
 
@@ -34,7 +34,7 @@ This machine has been running Arch for a bit as an experiment, so it was more or
 
 As noted above for installing runners, Forgejo has some great instructions for setting them up.
 For Arch there's also a `forgejo-runner` package in the **extra** repo, which I opted to start with.
-There's also a package in the the AUR, but I ran into some issues setting that up.
+There's also a package in the AUR, but I ran into some issues setting that up.
 
 ### Installation
 
@@ -44,7 +44,7 @@ In case you haven't installed these already, `docker` and `git` need to be prese
 sudo pacman -Syu forgejo-runner docker git
 ```
 
-Docker also needs to be enabled as well.
+Docker also needs to be enabled.
 
 ```bash
 sudo systemctl enable --now docker.service
@@ -53,7 +53,7 @@ sudo systemctl enable --now docker.service
 In my case the `forgejo-runner` user was created automatically, but it's good to double check that it's there.
 If not you can [make it yourself as well](https://forgejo.org/docs/v11.0/admin/actions/runner-installation/#setting-up-the-runner-user).
 
-Once the runner is all setup, you'll need a registration token from your Forgejo instance (local or otherwise).
+Once the runner is all set up, you'll need a registration token from your Forgejo instance (local or otherwise).
 This can be grabbed by hopping over to **/admin/actions/runners** at your Forgejo instance and setting up a new runner.
 It just needs a name and a description, and in return you'll get your token.
 Be sure to hold onto that, as you'll need it later when configuring a **.runner** file via `forgejo-runner register`[^forgejo-register].
@@ -61,7 +61,7 @@ I got to that part after ensuring Forgejo itself was ready to accept one.
 
 [^forgejo-register]:https://forgejo.org/docs/v11.0/admin/actions/runner-installation/#standard-registration
 
-I also needed to tweak the config shortly.
+I also needed to make a few tweaks to the config.
 This included deciding whether to require docker-in-docker jobs.
 That requires `container.privileged` to be set, and probably some other details, but I left this off on my end, so I can't attest to it.
 
@@ -71,8 +71,9 @@ As an aside, I had already made sure that my forgejo instance was securely acces
 For a publicly accessible forge this is likely to be an upfront concern that's already resolved.
 However, for a homelab setup a self-signed cert won't cut it when trying to hookup the runner.
 
-For me, my instance was configured & managed via Ansible, and also setup with self-signed certs (which again, wouldn't cut it).
+For me, my instance was configured & managed via Ansible, and also set up with self-signed certs (which again, wouldn't cut it).
 This worked initially, but the runner wouldn't be able to connect without a legitimate certificate authority (CA) to trust.
+This put me on a bit of a detour, since I needed to handle the certificate trust issue before I could register the runner.
 
 ### So, Let's Make a Certificate Authority to Trust
 
@@ -88,13 +89,14 @@ mkcert -install
 mkcert forgejo.lan localhost 127.0.0.1
 ```
 
-Of course, the names can be whatever suites your fancy, these were just for my own needs.
+Of course, the names can be whatever suits your fancy, these were just for my own needs.
 
-This gave me a cert & a key which I could use for as a source of trust, assuming the CA was trusted in advance.
+This gave me a cert & a key which I could use as a source of trust, assuming the CA itself was trusted in advance.
 Depending on how Forgejo is running, the cert & key can also be plugged into the config or into the **docker-compose.yml** itself.
 _If_ you are using docker-compose (like me) then you're going to have to also update/recreate the volume as well, since it gets populated on creation.
 
 Once that was in place, I wanted to make sure Forgejo actually pulled the new cert in correctly. If it's bare (without docker) there's nothing more to do, but with docker it was also straightforward:
+
 ```bash
 docker compose down
 docker compose up -d
@@ -114,13 +116,15 @@ I named mine `mkcert-forgejo.crt`, but you can choose what works on your end.
 ### Setting up the Runner
 
 Once that was in place, I also rebuilt my certificate bundle.
+
 ```bash
 sudo trust extract-compat
 ```
 
 And now that I had a trusted cert on my runner system, I could bind-mount the CA bundle into my jobs so that it's picked up.
 From what I was able to tell, this appears to be due to docker having its own separate CA file that it uses, but I didn't get around to verifying this directly.
-```bash
+
+```yaml
 container:
      valid_volumes:
        - /etc/ssl/certs/ca-certificates.crt
@@ -141,39 +145,43 @@ You can tweak them pretty easily as desired.
 
 I also double checked the systemd service at this point, to make sure it's running, registered, and that it's reading from the config I had changed (and not the **/var/** one).
 This got me pretty bad since I was assuming the **/var** location was the active config, and although there was a config present there, I spent a bit too much time trying to figure out why my changes weren't applying.
+
 ```bash
 systemctl cat forgejo-runner.service
 ```
 
-Once I resolveed the config issue, it was just a matter of enabling the freshly registered runner, & checking its status:
+Once I resolved the config issue, it was just a matter of enabling the freshly registered runner, & checking its status:
+
 ```bash
 sudo systemctl enable --now forgejo-runner.service
 sudo systemctl status forgejo-runner.service
 ```
 
-It might be worth checking the jouralctl to make sure something didn't go wrong behind the scenes as well, just to cover your bases.
+It might be worth checking `journalctl` to make sure something didn't go wrong behind the scenes as well, just to cover your bases.
+
 ```bash
 sudo journalctl -u forgejo-runner.service -f
 ```
 
-I also needed to verify that I could actually resolve the name of my forgejo instance from inside my runner's docker containers.
+I also needed to verify that I could actually resolve the name of my Forgejo instance from inside my runner's docker containers.
 `/etc/hosts` wouldn't cut it since that's just for my own system, and the runner will likely have its own resolution.
-There are a number of ways to do this, almost all of which revolve around updating the forgejo-runner configuration (very similar to what was done with the cert bundle above).
+There are a number of ways to do this, almost all of which revolve around updating the `forgejo-runner` configuration (very similar to what was done with the cert bundle above).
 
 Something like this did the trick for me.
 
-```bash
+```yaml
 container:
   options: "--add-host=forgejo.lan:192.168.1.x"
 ```
 
 And, per usual, it's always good to restart the runner:
+
 ```bash
 sudo systemctl restart forgejo-runner.service
 ```
 
-I also wanted this forgejo instance to be generally reachable across my network at `forgejo.lan`, not just this one machine.
-Thankfully, I already had a PiHole instance that I setup sometime later in 2025, and so I opted to add a custom DNS record for this very purpose.
+I also wanted this Forgejo instance to be generally reachable across my network at `forgejo.lan`, not just this one machine.
+Thankfully, I already had a PiHole instance that I set up in late 2025, and so I opted to add a custom DNS record for this very purpose.
 There's some care that should be taken with _what_ names you decide to set custom records for, as they could shadow legitimate names upstream (this applies to `.local` domains as well).
 
 Adding the record to PiHole was simple enough, but getting the container to pick up that same record took an extra step.
@@ -187,11 +195,13 @@ Creating that file and adding in some JSON with the following DNS servers got me
 ```
 
 Followed by a docker restart:
+
 ```bash
-sudo sysetmctl restart docker
+sudo systemctl restart docker
 ```
 
 And when I still wasn't sure, I ran a quick test by trying a lookup from inside an Alpine container:
+
 ```bash
 docker run --rm alpine sh -c "nslookup forgejo.lan"
 ```
@@ -207,8 +217,7 @@ As far as I could tell these worked pretty much out of the box.
 I'm sure there are exceptions, but it seems the Forgejo runner follows pretty closely with their specification language & features, which is very convenient.
 
 And that was about it!
-At this point I had a custom Forgejo runner for CI jobs on an old macbook pro.
-It didn't really need to be setup with such old hardware, but it was a lot of fun to do so.
+At this point I had a custom Forgejo runner for CI jobs on an old MacBook Pro.
+It didn't really need to be set up with such old hardware, but it was a lot of fun to do so.
 Best of all when I don't need the runner online, the forge works just fine without it, so I can opt to turn it on as need be.
-However next time I think I'll pick up a more dedicated machine to do the job.
-Especially when automated publishing is a goal (such as for npm packages).
+However next time I think I'll pick up a more dedicated machine to do the job - especially when automated publishing is a goal (such as for npm packages).
