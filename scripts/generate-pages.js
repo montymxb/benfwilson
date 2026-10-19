@@ -5,12 +5,12 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const DOCS_DIR = path.join(__dirname, '../docs')
+const DIST_DIR = path.join(__dirname, '../dist')
 const POSTS_FILE = path.join(__dirname, '../src/utils/posts.js')
 
 // read the base index.html from the build output
 function getBaseHtml() {
-  const indexPath = path.join(DOCS_DIR, 'index.html')
+  const indexPath = path.join(DIST_DIR, 'index.html')
   if (!fs.existsSync(indexPath)) {
     throw new Error('Build output not found. Run "vite build" first.')
   }
@@ -58,7 +58,7 @@ function generatePages() {
   const posts = getPosts()
 
   // generate page for /about
-  const aboutDir = path.join(DOCS_DIR, 'about')
+  const aboutDir = path.join(DIST_DIR, 'about')
   if (!fs.existsSync(aboutDir)) {
     fs.mkdirSync(aboutDir, { recursive: true })
   }
@@ -70,10 +70,23 @@ function generatePages() {
   fs.writeFileSync(path.join(aboutDir, 'index.html'), aboutHtml)
   console.log('   ✓ /about')
 
+  // generate page for /resume
+  const resumeDir = path.join(DIST_DIR, 'resume')
+  if (!fs.existsSync(resumeDir)) {
+    fs.mkdirSync(resumeDir, { recursive: true })
+  }
+  const resumeHtml = createHtmlPage(
+    baseHtml,
+    'Resume',
+    'Resume of Benjamin F. Wilson, software & language engineer'
+  )
+  fs.writeFileSync(path.join(resumeDir, 'index.html'), resumeHtml)
+  console.log('   ✓ /resume')
+
   // generate pages for each post
   let postCount = 0
   for (const post of posts) {
-    const postDir = path.join(DOCS_DIR, 'post', post.slug)
+    const postDir = path.join(DIST_DIR, 'post', post.slug)
     if (!fs.existsSync(postDir)) {
       fs.mkdirSync(postDir, { recursive: true })
     }
@@ -88,7 +101,7 @@ function generatePages() {
     postCount++
   }
 
-  console.log(`\n✅ Generated ${postCount + 1} pages (${postCount} posts + 1 about page)`)
+  console.log(`\n✅ Generated ${postCount + 2} pages (${postCount} posts + about & resume pages)`)
 }
 
 generatePages()

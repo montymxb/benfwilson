@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router'
 import { getAllPosts, getPost } from './utils/posts.js'
 import { preprocessMarkdown } from './utils/markdown.js'
+import { resumePdfs, experience, education, publications, talks, service, skills } from './utils/resume.js'
 import Markdown from 'marked-react'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
@@ -32,6 +33,12 @@ function Header() {
           className={isActive('/about') ? 'active' : ''}
         >
           about
+        </Link>
+        <Link
+          to="/resume"
+          className={isActive('/resume') ? 'active' : ''}
+        >
+          resume
         </Link>
       </nav>
     </header>
@@ -221,6 +228,101 @@ function AboutPage() {
   )
 }
 
+// renders a short markdown string inline, opening links in a new tab
+function Inline({ text }) {
+  const renderer = {
+    link(href, children) {
+      return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+    }
+  }
+  return <Markdown isInline renderer={renderer}>{text}</Markdown>
+}
+
+function ResumeEntry({ entry }) {
+  const meta = [entry.org, entry.location].filter(Boolean).join(' · ')
+
+  return (
+    <div className="resume-entry">
+      <div className="resume-entry-head">
+        <h3>
+          {entry.url
+            ? <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.role}</a>
+            : entry.role}
+        </h3>
+        <time className="resume-period">{entry.period}</time>
+      </div>
+      {meta && <div className="resume-meta">{meta}</div>}
+      {entry.points && (
+        <ul>
+          {entry.points.map((point, i) => {
+            // points are plain strings, or objects carrying nested sub points
+            if (typeof point === 'string') {
+              return <li key={i}><Inline text={point} /></li>
+            }
+            return (
+              <li key={i}>
+                <Inline text={point.text} />
+                <ul>
+                  {point.sub.map((sub, j) => <li key={j}><Inline text={sub} /></li>)}
+                </ul>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function ResumePage() {
+  return (
+    <div className="resume-content">
+      <h1>Resume</h1>
+      <div className="resume-links">
+        <a href="https://www.linkedin.com/in/benwilsonfriedman" target="_blank" rel="noopener noreferrer">linkedin</a>
+        <a href="https://github.com/montymxb" target="_blank" rel="noopener noreferrer">github</a>
+        {resumePdfs.map(pdf => (
+          <a key={pdf.href} href={pdf.href} target="_blank" rel="noopener noreferrer">{pdf.label}</a>
+        ))}
+      </div>
+
+      <section>
+        <h2>Experience</h2>
+        {experience.map(entry => <ResumeEntry key={entry.role} entry={entry} />)}
+      </section>
+
+      <section>
+        <h2>Education</h2>
+        {education.map(entry => <ResumeEntry key={entry.role} entry={entry} />)}
+      </section>
+
+      <section>
+        <h2>Publications</h2>
+        <ul>
+          {publications.map((pub, i) => <li key={i}><Inline text={pub} /></li>)}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Talks</h2>
+        {talks.map(entry => <ResumeEntry key={entry.url} entry={entry} />)}
+      </section>
+
+      <section>
+        <h2>Research & Service</h2>
+        {service.map(entry => <ResumeEntry key={entry.role} entry={entry} />)}
+      </section>
+
+      <section>
+        <h2>Skills</h2>
+        <ul>
+          {skills.map((skill, i) => <li key={i}><Inline text={skill} /></li>)}
+        </ul>
+      </section>
+    </div>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -230,6 +332,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/resume" element={<ResumePage />} />
             <Route path="/post/:slug" element={<PostPage />} />
           </Routes>
         </main>

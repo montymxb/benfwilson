@@ -16,3 +16,9 @@ If you are developing a production application, we recommend using TypeScript wi
 ## Building
 
 New posts go into **src/posts/**. Once those have been written up, `npm run build-posts` will invoke a custom builder to generate a new **post.js** file, which drives most of the behavior on the site.
+
+`npm run build` writes the site to **dist/**, which is not version controlled.
+
+## Deployment
+
+The **CI** workflow lints and builds on every push and pull request. When CI passes on `main`, the **Deploy** workflow rebuilds the site and publishes it to GitHub Pages.
