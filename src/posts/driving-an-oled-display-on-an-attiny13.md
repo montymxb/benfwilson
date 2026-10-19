@@ -4,6 +4,8 @@ date: 2026-04-18
 tags: [attiny, post, project, avr, oled]
 excerpt: Setting up a tiny OLED driver to work within 1kb of flash & 64 bytes of SRAM on an ATTiny13
 draft: false
+image: /assets/images/oled1.jpg
+imageAlt: A blue/black 1.3" 128x64 OLED Display based on the SH1106. And yes, the peel is still on.
 ---
 
 > [!NOTE]

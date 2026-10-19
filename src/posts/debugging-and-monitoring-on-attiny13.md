@@ -4,6 +4,8 @@ date: 2026-03-07
 tags: [attiny, post, project, avr, debugging]
 excerpt: Getting debugging & monitoring setup with bit-banged UART on the ATTiny13
 draft: false
+image: /assets/images/comms-hw.png
+imageAlt: Minicom output showing the string "Hello World" being received from the UART
 ---
 
 *Updated on June 16th with a few minicom images.*

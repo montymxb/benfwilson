@@ -4,6 +4,8 @@ date: 2026-10-19
 tags: [post, project, electronics, 3d printing, rc, car]
 excerpt: A look back at three homemade RC cars, from a 3D printed mouse droid to a literal cube on wheels.
 draft: false
+image: /assets/images/cube1.jpg
+imageAlt: Third iteration of a simple RC car. In this case not much going on style-wise, but there's more under the hood.
 ---
 
 Over the last couple of years I've been building little remote control cars on and off.
