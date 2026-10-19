@@ -12,7 +12,7 @@ export const experience = [
     location: 'Germany (Remote)',
     period: '2024 – Present',
     points: [
-      'Designed and delivered Langium-based DSLs, type systems, and code generators for enterprise clients',
+      'Design and deliver Langium-based DSLs, type systems, and code generators for enterprise clients',
       {
         text: 'Founded and lead [Langium AI](https://github.com/eclipse-langium/langium-ai), an Eclipse Foundation project bringing AI-assisted development to DSLs',
         sub: ['Featured as part of the Eclipse Foundation\'s open source AI innovation efforts ([aieclipse.org](https://aieclipse.org))'],
