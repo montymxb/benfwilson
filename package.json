@@ -10,6 +10,7 @@
     "build": "npm run build-posts && vite build && npm run generate-pages",
     "watch": "nodemon --watch src/posts/ --ext md --exec 'npm run build'",
     "lint": "eslint .",
+    "clean": "rm -rf dist src/utils/posts.js",
     "preview": "vite preview",
     "optimize:images": "bash scripts/optimize-images.sh",
     "lint:prose": "vale src/posts/"
