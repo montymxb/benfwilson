@@ -1,6 +1,6 @@
 ---
 title: "Three RC Cars: Builds and Thoughts"
-date: 2026-10-14
+date: 2026-10-19
 tags: [post, project, electronics, 3d printing, rc, car]
 excerpt: A look back at three homemade RC cars, from a 3D printed mouse droid to a literal cube on wheels.
 draft: false
