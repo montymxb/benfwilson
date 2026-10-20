@@ -55,3 +55,4 @@ unoptimized
 libc
 minicom
 globals
+[Ll]angium
