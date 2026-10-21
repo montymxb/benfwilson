@@ -1,6 +1,6 @@
 ---
 title: "We Published a Langium Paper at MODELS '26"
-date: 2026-10-20
+date: 2026-10-21
 tags: [post, langium, typefox, paper, dsl, language engineering]
 excerpt: Our Langium paper was recently published at MODELS Companion '26.
 draft: false
